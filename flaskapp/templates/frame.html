@@ -1,0 +1,52 @@
+<!doctype html>
+<link rel="stylesheet" href={{url_for('static', filename='semantic.min.css')}}>
+<link rel="stylesheet" href={{url_for('static', filename='main.css')}}>
+ <div class="ui top fixed secondary pointing menu">
+  <div class="item">
+    <img src="">
+  </div>
+  <a class="item {% if path =="/" %}active{% endif %}" href="/">Home</a>
+  {% if user %}
+  <a class="item {% if path =="/myimgs" %}active{% endif %}" href="myimgs">My Images</a>
+  {% endif %}
+  <div class="right menu">
+     {% if user %}
+     <a class="item" id="showmodal">Add Image</a>
+     <a class="item" href="/logout">Sign Out</a>
+     {% else %}
+     <a class="item" href="/login">Sign In</a>
+     {% endif %}
+  </div>
+</div>
+<div class="ui modal">
+  <div class="header">New Image</div>
+  <div class="content">
+   <form class="ui form" method="post" action="/new">
+     <div class="field">
+     <label>Image URL</label>
+     <input type="url" name="url" placeholder="http://www.example.com" required>
+     </div>
+     <div class="field">
+      <label>Description</label>
+      <textarea rows="2" name="desc" required></textarea>
+     </div>
+     <button class="ui button" type="submit">Add</button>
+   </form>
+  </div>
+</div>
+<div class="ui container" style="padding-top:50px">
+ {% for message in get_flashed_messages() %}
+   <div class="flash">{{ message }}</div>
+ {% endfor %}
+ {% block content %}{% endblock %}
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src={{url_for('static', filename='semantic.min.js')}}></script>
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<script>
+$('#showmodal').on('click',function(){
+ $('.ui.modal')
+  .modal('show');
+})
+</script>
+{% block script %}{% endblock %}
