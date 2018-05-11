@@ -31,13 +31,4 @@ def init_db_command():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
-    #app.cli.add_command(add_fake_user)
-
-#@click.command('add-user')
-#@click.argument('username')
-#@with_appcontext    
-#def add_fake_user(username):
-#    db = get_db()
-#    db.execute("INSERT INTO users (username) VALUES (?)",(username,))
-#    db.commit()
     

@@ -1,22 +1,39 @@
 <!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href={{url_for('static', filename='semantic.min.css')}}>
-<link rel="stylesheet" href={{url_for('static', filename='main.css')}}>
- <div class="ui top fixed secondary pointing menu">
-  <div class="item">
-    <img src="">
-  </div>
-  <a class="item {% if path =="/" %}active{% endif %}" href="/">Home</a>
-  {% if user %}
-  <a class="item {% if path =="/myimgs" %}active{% endif %}" href="myimgs">My Images</a>
-  {% endif %}
-  <div class="right menu">
+<div class="ui top fixed menu" style="background-color:white;display:block">
+    <div class="ui menu text">
+     <div class="item">
+      <a class="ui header" href="/" style="margin-left:9px">Pinterest Clone</a>
+     </div>
+    <div class="right menu">
+   <div class="ui item dropdown">
+   <i class="cog icon"></i>
+   <div class="menu">
      {% if user %}
-     <a class="item" id="showmodal">Add Image</a>
-     <a class="item" href="/logout">Sign Out</a>
+     <a class="item showmodal"><span class="text">Add Image</span></a>
+     <a class="item" href="/auth/logout">Log Out&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
      {% else %}
-     <a class="item" href="/login">Sign In</a>
+     <a class="item" href="/auth"}>Log In&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
      {% endif %}
+      <div class="divider"></div>
+      <a class="item">About&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
   </div>
+  </div>
+  </div>
+  </div>
+  <div class="ui menu pointing secondary">
+  <a class="item {% if path =="/" %}active{% endif %}" href="/">All</a>
+  {% if user %}
+  <a class="item {% if path =="/myimgs" %}active{% endif %}" href={{user}}>My Images</a>
+  <a class="item {% if path =="/mylikes" %}active{% endif %}" href="mylikes">My Likes</a>
+  <a class="item showmodal">
+   <i class="icon plus circle"></i>
+  </a>
+  {% endif %}
+  
+  </div>
+
 </div>
 <div class="ui modal">
   <div class="header">New Image</div>
@@ -34,19 +51,29 @@
    </form>
   </div>
 </div>
-<div class="ui container" style="padding-top:50px">
+<div class="ui main container" >
  {% for message in get_flashed_messages() %}
-   <div class="flash">{{ message }}</div>
+   <div class="ui negative message">
+    <div class="header">{{ message }}</div>
+   </div>
  {% endfor %}
  {% block content %}{% endblock %}
 </div>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src={{url_for('static', filename='semantic.min.js')}}></script>
 <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.waitforimages/1.5.0/jquery.waitforimages.min.js"></script>
+
 <script>
-$('#showmodal').on('click',function(){
+$('.showmodal').on('click',function(){
  $('.ui.modal')
   .modal('show');
+})
+$('.ui.dropdown')
+  .dropdown();
+$('.icon.close').on('click',function(){
+ 
 })
 </script>
 {% block script %}{% endblock %}

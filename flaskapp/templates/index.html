@@ -1,5 +1,6 @@
 {% extends 'frame.html' %}
 {% block content %}
+
 <div class="grid">
     {% for img in imgs %}
     <div class="grid-item">
@@ -16,10 +17,23 @@
                 </div>
             </div>
             <div class="extra content">
-                <a>
+                <a href={{img['author_id']}}>
                   <i class="user icon"></i>
-                  {{img['author_name']}}
+                  {{img['user_name']}}
                 </a>
+                <div class="like" style="float:right" id={{img['id']}}>
+                  {% if user %}
+                      {% if img['id'] in likes%}
+                      <i class="red heart unlike icon"></i>
+                      {% else %}
+                      <i class="like icon"></i>
+                      {% endif %}
+                  {% endif %}
+                  <span id="nlike">{{img['likes']}}</span> Likes
+                  {% if img['author_id'] == user %}
+                  <i class="trash alternate icon"></i>
+                  {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -29,9 +43,72 @@
 {% block script %}
 <script>
 
-$('.grid').masonry({
-  itemSelector: '.grid-item',
-  columnWidth: 160
+$('.grid').waitForImages(function(){
+    $('.grid').masonry({
+     itemSelector: '.grid-item',
+      columnWidth: 160,
+      gutter: 0,
+      fitWidth: true
+  });
+})
+var msnry = $('.grid').data('masonry');
+
+$('.grid').infiniteScroll({
+  path: function(){return '/'},
+  append: '.grid-item',
+  status: '.page-load-status',
+  outlayer: msnry
 });
+
+
+
+$(document).on("click",".like.icon", function(){
+    var $this = $(this);
+    var id = $this.parent().attr('id');
+    var n = Number($this.next('#nlike').text());
+    Promise.resolve($.ajax({
+        url:"/like",
+        method:"PUT",
+        data:{
+            id:id
+        }
+    })).then(function(){
+        $this.removeClass('like');
+        $this.addClass('unlike heart red')
+        $this.next('#nlike').text(n+1)
+    })
+});
+
+$(document).on("click",".unlike.icon", function(){
+    var $this = $(this);
+    var id = $this.parent().attr('id');
+    var n = Number($this.next('#nlike').text());
+    Promise.resolve($.ajax({
+        url:"/unlike",
+        method:"PUT",
+        data:{
+            id:id
+        }
+    })).then(function(){
+        $this.removeClass('unlike heart red');
+        $this.addClass('like');
+        $this.next('#nlike').text(n-1)
+    })
+
+});
+
+$('.trash.icon').on('click',function(){
+    var id = $(this).parent().attr('id');
+    Promise.resolve($.ajax({
+        url:'/delete',
+        method:"DELETE",
+        data:{
+            id:id
+        }
+    })).then(function(){
+        window.location.reload();
+    })
+})
+
 </script>
 {% endblock %}
