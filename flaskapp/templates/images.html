@@ -1,0 +1,38 @@
+ <div class="grid">
+ {% for img in imgs %}
+     <div class="grid-item">
+        <div class="ui card">
+            <div class="image">
+                <img src={{img['url']}}>
+            </div>
+            <div class="content">
+                <div class="description">
+                    {{img['description']}}
+                </div>
+                <div class="meta">
+                    {{img['created']}}
+                </div>
+            </div>
+            <div class="extra content">
+                <a href={{img['author_id']}}>
+                  <i class="user icon"></i>
+                  {{img['user_name']}}
+                </a>
+                <div class="like" style="float:right" id={{img['id']}}>
+                  {% if user %}
+                      {% if img['id'] in likes%}
+                      <i class="red heart unlike icon"></i>
+                      {% else %}
+                      <i class="like icon"></i>
+                      {% endif %}
+                  {% endif %}
+                  <span id="nlike">{{img['likes']}}</span> Likes
+                  {% if img['author_id'] == user %}
+                  <i class="trash alternate icon"></i>
+                  {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+ {% endfor %}
+ </div>

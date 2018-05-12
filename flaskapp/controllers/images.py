@@ -8,23 +8,41 @@ bp = Blueprint('images',__name__)
 @bp.route('/')
 def home():
     db_inst = get_db()
-    imgs = db_inst.execute('''SELECT user_name,author_id, images.id AS id, created, description, url, likes 
-    FROM images JOIN users ON images.author_id == users.user_id''').fetchall()
+    imgs = db_inst.execute('''SELECT user_name,author_id,
+    images.id AS id, created, description, url, likes 
+    FROM images JOIN users ON images.author_id == users.user_id
+    LIMIT 6''').fetchall()
+    nentries = db_inst.execute("SELECT COUNT(*) AS nentries FROM images").fetchone()
     likes = []
     if 'twitter_oauth_token' in session:
         likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
         (session['twitter_oauth_token']['user_id'],)).fetchall()
         likes = list(map(lambda x: x['image_id'], likes))
-    return render_template('index.html',path="/",imgs=imgs,likes=likes,
+    return render_template('index.html',path="/",imgs=imgs,likes=likes,nentries=nentries[0],
     user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
-        
+
+@bp.route('/contimg/<n>')
+def contimg(n):
+    db_inst = get_db()
+    imgs = db_inst.execute('''SELECT user_name,author_id,
+    images.id AS id, created, description, url, likes 
+    FROM images JOIN users ON images.author_id == users.user_id
+    LIMIT 6 OFFSET ?''',(n,)).fetchall()
+    likes = []
+    if 'twitter_oauth_token' in session:
+        likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
+        (session['twitter_oauth_token']['user_id'],)).fetchall()
+        likes = list(map(lambda x: x['image_id'], likes))
+    return render_template('images.html',imgs=imgs,likes=likes,
+    user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
     
 @bp.route('/<userid>')
 def user_imgs(userid):
     db_inst = get_db()
     imgs = db_inst.execute('''SELECT user_name,author_id, images.id AS id, created, description, url, likes 
     FROM images JOIN users ON images.author_id == users.user_id 
-    WHERE users.user_id == ?''',(userid,))
+    WHERE users.user_id == ?
+    LIMIT 6''',(userid,)).fetchall()
     likes = []
     path = None
     if 'twitter_oauth_token' in session:

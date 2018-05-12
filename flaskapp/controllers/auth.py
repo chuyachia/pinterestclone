@@ -30,7 +30,6 @@ def logout():
 def adduser():
     db_inst = get_db()
     user = db_inst.execute('SELECT * FROM users WHERE user_id == (?)',(session['twitter_oauth_token']['user_id'],)).fetchone()
-    print(user)
     if user is None:
         print('Add new user')
         db_inst.execute('INSERT INTO users (user_id,user_name) VALUES (?,?)',(session['twitter_oauth_token']['user_id'],

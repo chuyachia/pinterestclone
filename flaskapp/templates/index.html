@@ -42,73 +42,80 @@
 {% endblock %}
 {% block script %}
 <script>
-
-$('.grid').waitForImages(function(){
-    $('.grid').masonry({
-     itemSelector: '.grid-item',
-      columnWidth: 160,
-      gutter: 0,
-      fitWidth: true
-  });
-})
-var msnry = $('.grid').data('masonry');
-
-$('.grid').infiniteScroll({
-  path: function(){return '/'},
-  append: '.grid-item',
-  status: '.page-load-status',
-  outlayer: msnry
-});
-
-
-
-$(document).on("click",".like.icon", function(){
-    var $this = $(this);
-    var id = $this.parent().attr('id');
-    var n = Number($this.next('#nlike').text());
-    Promise.resolve($.ajax({
-        url:"/like",
-        method:"PUT",
-        data:{
-            id:id
-        }
-    })).then(function(){
-        $this.removeClass('like');
-        $this.addClass('unlike heart red')
-        $this.next('#nlike').text(n+1)
+(function(){
+    var totalloads = Math.floor('{{nentries}}'/6)||0;
+    var $grid = $('.grid');
+    $grid.waitForImages(function(){
+        $grid.masonry({
+            itemSelector: '.grid-item',
+            columnWidth: 160,
+            gutter: 0,
+            fitWidth: true
+        });
     })
-});
-
-$(document).on("click",".unlike.icon", function(){
-    var $this = $(this);
-    var id = $this.parent().attr('id');
-    var n = Number($this.next('#nlike').text());
-    Promise.resolve($.ajax({
-        url:"/unlike",
-        method:"PUT",
-        data:{
-            id:id
-        }
-    })).then(function(){
-        $this.removeClass('unlike heart red');
-        $this.addClass('like');
-        $this.next('#nlike').text(n-1)
+    if (totalloads>0){
+        var msnry = $grid.data('masonry');
+        function loadPage(){
+                if (this.loadCount<totalloads){
+                      return '/contimg/'+(this.loadCount+1)*6
+                 }
+            }
+        
+        $grid.infiniteScroll({
+          path: loadPage,
+          append: '.grid-item',
+          status: '.page-load-status',
+          outlayer: msnry
+        });
+    }   
+    $(document).on("click",".like.icon", function(){
+        var $this = $(this);
+        var id = $this.parent().attr('id');
+        var n = Number($this.next('#nlike').text());
+        Promise.resolve($.ajax({
+            url:"/like",
+            method:"PUT",
+            data:{
+                id:id
+            }
+        })).then(function(){
+            $this.removeClass('like');
+            $this.addClass('unlike heart red')
+            $this.next('#nlike').text(n+1)
+        })
+    });
+    
+    $(document).on("click",".unlike.icon", function(){
+        var $this = $(this);
+        var id = $this.parent().attr('id');
+        var n = Number($this.next('#nlike').text());
+        Promise.resolve($.ajax({
+            url:"/unlike",
+            method:"PUT",
+            data:{
+                id:id
+            }
+        })).then(function(){
+            $this.removeClass('unlike heart red');
+            $this.addClass('like');
+            $this.next('#nlike').text(n-1)
+        })
+    
+    });
+    $(document).on("click",".trash.icon", function(){
+        var $this = $(this);
+        var id = $this.parent().attr('id');
+        Promise.resolve($.ajax({
+            url:'/delete',
+            method:"DELETE",
+            data:{
+                id:id
+            }
+        })).then(function(){
+            window.location.href="/"
+        })
     })
-
-});
-
-$('.trash.icon').on('click',function(){
-    var id = $(this).parent().attr('id');
-    Promise.resolve($.ajax({
-        url:'/delete',
-        method:"DELETE",
-        data:{
-            id:id
-        }
-    })).then(function(){
-        window.location.reload();
-    })
-})
-
+ 
+})()
 </script>
 {% endblock %}
