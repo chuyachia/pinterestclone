@@ -6,21 +6,13 @@
      <div class="item">
       <a class="ui header" href={{url_for('images.home')}} style="margin-left:9px">Pinterest Clone</a>
      </div>
-    <div class="right menu">
-   <div class="ui item dropdown">
-   <i class="cog icon"></i>
-   <div class="menu">
-     {% if user %}
-     <a class="item showmodal"><span class="text">Add Image</span></a>
-     <a class="item" href={{url_for('twitter.logout')}}>Log Out</a>
-     {% else %}
-     <a class="item" href={{url_for('twitter.index')}}>Log In</a>
-     {% endif %}
-      <div class="divider"></div>
-      <a class="item">About</a>
-  </div>
-  </div>
-  </div>
+     <div class="right menu">
+        {% if user %}
+        <a class="item" href={{url_for('twitter.logout')}}>Log Out</a>
+        {% else %}
+        <a class="item" href={{url_for('twitter.index')}}>Log In</a>
+        {% endif %}
+   </div>
   </div>
   <div class="ui menu pointing secondary">
   <a class="item {% if path =="/" %}active{% endif %}" href={{url_for('images.home')}}>All</a>
