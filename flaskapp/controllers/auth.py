@@ -12,6 +12,14 @@ bp = make_twitter_blueprint(
     redirect_to='twitter.adduser'
 )
 
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if not 'twitter_oauth_token' in session:
+            return redirect(url_for('twitter.login'))
+        return view(**kwargs)
+    return wrapped_view
+
 @bp.route("/")
 def index():
     if not twitter.authorized:
@@ -27,6 +35,7 @@ def logout():
     return redirect(url_for('images.home'))
 
 @bp.route("/adduser")
+@login_required
 def adduser():
     db_inst = get_db()
     user = db_inst.execute('SELECT * FROM users WHERE user_id == (?)',(session['twitter_oauth_token']['user_id'],)).fetchone()
@@ -41,11 +50,3 @@ def adduser():
         db_inst.commit()
     return redirect(url_for('images.home'))
     
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if not 'twitter_oauth_token' in session:
-            print('here')
-            return redirect(url_for('twitter.login'))
-        return view(**kwargs)
-    return wrapped_view

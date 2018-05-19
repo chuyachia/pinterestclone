@@ -39,12 +39,15 @@ def contimg(n):
 @bp.route('/<userid>')
 def user_imgs(userid):
     db_inst = get_db()
+    likes = []
+    path = None
     imgs = db_inst.execute('''SELECT user_name,author_id, images.id AS id, created, description, url, likes 
     FROM images JOIN users ON images.author_id == users.user_id 
     WHERE users.user_id == ?
     LIMIT 6''',(userid,)).fetchall()
-    likes = []
-    path = None
+    if len(imgs)  == 0:
+           return render_template('index.html',path=path,imgs=imgs,likes=likes,
+           user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None),404
     if 'twitter_oauth_token' in session:
         likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
         (session['twitter_oauth_token']['user_id'],)).fetchall()
@@ -104,12 +107,16 @@ def addimg():
 def like():
     if request.method == 'PUT':
         db_inst = get_db()
-        db_inst.execute("UPDATE images SET likes = likes + 1 WHERE id =? ",
-        (request.form['id'],))
-        db_inst.execute("INSERT INTO likes (author_id,image_id) VALUES (?,?)",
-        (session['twitter_oauth_token']['user_id'],request.form['id']))
-        db_inst.commit()
-    return 'success'
+        img = db_inst.execute("SELECT * FROM images WHERE id =? ",
+        (request.form['id'],)).fetchone()
+        if img:
+            db_inst.execute("UPDATE images SET likes = likes + 1 WHERE id =? ",
+            (request.form['id'],))
+            db_inst.execute("INSERT INTO likes (author_id,image_id) VALUES (?,?)",
+            (session['twitter_oauth_token']['user_id'],request.form['id']))
+            db_inst.commit()
+            return 'success',200
+    return 'fail', 404
     
     
 @bp.route('/unlike',methods=['PUT'])
@@ -117,22 +124,31 @@ def like():
 def unlike():
     if request.method == 'PUT':
         db_inst = get_db()
-        db_inst.execute("UPDATE images SET likes = likes -1 WHERE id =? ",
-        (request.form['id'],))
-        db_inst.execute("DELETE FROM likes WHERE author_id= ? AND image_id=?",
-        (session['twitter_oauth_token']['user_id'],request.form['id']))
-        db_inst.commit()
-    return 'success'
+        img = db_inst.execute("SELECT * FROM images WHERE id =? ",
+        (request.form['id'],)).fetchone()
+        if img:
+            db_inst.execute("UPDATE images SET likes = likes -1 WHERE id =? ",
+            (request.form['id'],))
+            db_inst.execute("DELETE FROM likes WHERE author_id= ? AND image_id=?",
+            (session['twitter_oauth_token']['user_id'],request.form['id']))
+            db_inst.commit()
+            return 'success', 200
+    return 'fail', 404
     
 @bp.route('/delete',methods=['DELETE'])
 @login_required
 def delete():
     if request.method == 'DELETE':
         db_inst = get_db()
-        db_inst.execute("DELETE FROM images WHERE id=?",
-        (request.form['id'],))
-        db_inst.commit()
-    return 'success'
+        img_author= db_inst.execute("SELECT id, author_id FROM images WHERE id =?",(request.form['img_id'],)).fetchone()
+        if str(img_author['author_id']) == session['twitter_oauth_token']['user_id']:
+            db_inst.execute("DELETE FROM images WHERE id=?",
+            (request.form['img_id'],))
+            db_inst.execute("DELETE FROM likes WHERE image_id=?",
+            (request.form['img_id'],))
+            db_inst.commit()
+            return 'success',200
+    return 'fail', 403
     
 
     

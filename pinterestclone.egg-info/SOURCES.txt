@@ -1,0 +1,10 @@
+MANIFEST.in
+README.md
+flaskapp/__init__.py
+flaskapp/models/schema.sql
+pinterestclone.egg-info/PKG-INFO
+pinterestclone.egg-info/SOURCES.txt
+pinterestclone.egg-info/dependency_links.txt
+pinterestclone.egg-info/not-zip-safe
+pinterestclone.egg-info/requires.txt
+pinterestclone.egg-info/top_level.txt

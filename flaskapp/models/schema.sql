@@ -27,6 +27,6 @@ CREATE TABLE likes(
     FOREIGN KEY (image_id) REFERENCES images (id)
 );
 
-INSERT INTO users (user_id, user_name) VALUES (00000,"testuser");
-INSERT INTO images (author_id, description, url,likes) VALUES (00000,"test post",
+INSERT INTO users (user_id, user_name) VALUES (0,"testuser");
+INSERT INTO images (author_id, description, url,likes) VALUES (0,"test post",
 "http://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/11/12225358/Pug-On-White-01.jpg",0);

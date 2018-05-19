@@ -104,12 +104,12 @@
     });
     $(document).on("click",".trash.icon", function(){
         var $this = $(this);
-        var id = $this.parent().attr('id');
+        var img_id = $this.parent().attr('id');
         Promise.resolve($.ajax({
             url:'/delete',
             method:"DELETE",
             data:{
-                id:id
+                img_id:img_id
             }
         })).then(function(){
             window.location.href="/"
