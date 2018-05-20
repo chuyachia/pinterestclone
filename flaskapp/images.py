@@ -2,6 +2,7 @@ from flask import render_template, session, redirect, url_for, request, flash, B
 from .auth import login_required
 from .db import get_db
 from urllib.request import urlopen, Request
+from .components.forms import AddNewForm
 
 bp = Blueprint('images',__name__)
 
@@ -18,7 +19,7 @@ def home():
         likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
         (session['twitter_oauth_token']['user_id'],)).fetchall()
         likes = list(map(lambda x: x['image_id'], likes))
-    return render_template('index.html',path="/",imgs=imgs,likes=likes,nentries=nentries[0],
+    return render_template('index.html',path="/",imgs=imgs,likes=likes,nentries=nentries[0],form = AddNewForm(),
     user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
 
 @bp.route('/contimg/<n>')
@@ -54,7 +55,7 @@ def user_imgs(userid):
         likes = list(map(lambda x: x['image_id'], likes))
         if session['twitter_oauth_token']['user_id'] == userid:
             path="/myimgs"
-    return render_template('index.html',path=path,imgs=imgs,likes=likes,
+    return render_template('index.html',path=path,imgs=imgs,likes=likes,form = AddNewForm(),
     user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
     
 @bp.route('/mylikes')
@@ -69,14 +70,15 @@ def mylikes():
         likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
         (session['twitter_oauth_token']['user_id'],)).fetchall()
         likes = list(map(lambda x: x['image_id'], likes))
-    return render_template('index.html',path="/mylikes",imgs=imgs,likes=likes,
+    return render_template('index.html',path="/mylikes",imgs=imgs,likes=likes,form = AddNewForm(),
     user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
     
 @bp.route('/new',methods=['POST'])
 @login_required
 def addimg():
-    if request.method == 'POST':
-        url = request.form['url']
+    form = AddNewForm()
+    if form.validate_on_submit():
+        url =form.url.data
         error = None
         try:
             headers={
@@ -92,14 +94,15 @@ def addimg():
             error="Url does not exist"
 
         if error is not None:
-            flash(error)
+            flash(error,'error')
         else:
             author_id = session['twitter_oauth_token']['user_id']
-            desc = request.form['desc'] 
+            desc = form.desc.data 
             db_inst = get_db()
             db_inst.execute("INSERT INTO images (author_id,url,description,likes) VALUES (?,?,?,?)",
             (author_id,url,desc,0))
             db_inst.commit()
+            flash('New image added','success')
     return redirect(url_for('images.home'))
      
 @bp.route('/like',methods=['PUT'])

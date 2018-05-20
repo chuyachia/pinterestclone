@@ -2,7 +2,7 @@ from flask import redirect, url_for, g, session, current_app
 from flask_dance.contrib.twitter import make_twitter_blueprint, twitter
 from .db import get_db
 import functools
-from ..config.config import Config
+from .config.config import Config
 
 
 

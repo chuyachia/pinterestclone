@@ -30,25 +30,34 @@
 <div class="ui modal">
   <div class="header">New Image</div>
   <div class="content">
-   <form class="ui form" method="post" action="/new">
+   <form class="ui form" method="post" action={{url_for('images.addimg')}}>
+    {{form.hidden_tag()}}
      <div class="field">
-     <label>Image URL</label>
-     <input type="url" name="url" placeholder="http://www.example.com" required>
+     {{form.url.label}}
+     {{form.url(required="true",type="url")}}
      </div>
      <div class="field">
-      <label>Description</label>
-      <textarea rows="2" name="desc" required></textarea>
+     {{form.desc.label}}
+     {{form.desc(required="true",rows="2")}}
      </div>
-     <button class="ui button" type="submit">Add</button>
+     {{ form.submit(class="ui button")}}
    </form>
   </div>
 </div>
 <div class="ui main container" >
- {% for message in get_flashed_messages() %}
-   <div class="ui negative message">
-    <div class="header">{{ message }}</div>
-   </div>
- {% endfor %}
+ {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+   {% for category, message in messages%}
+     {% if category =='error' %}
+      <div class="ui negative message">
+     {% else %}
+     <div class="ui positive message">
+      {% endif %}
+     <div class="header">{{ message }}</div>
+    </div>
+   {% endfor %}
+  {% endif %}
+ {% endwith %}
  {% block content %}{% endblock %}
 </div>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>

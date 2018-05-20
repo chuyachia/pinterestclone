@@ -18,10 +18,10 @@ def create_app(test_config=None):
     except OSError:
         pass
     
-    from .controllers import db
+    from . import db
     db.init_app(app)
     
-    from .controllers import auth, images
+    from . import auth, images
     app.register_blueprint(auth.bp, url_prefix="/auth")
     app.register_blueprint(images.bp)
     
