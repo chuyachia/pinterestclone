@@ -1,14 +1,14 @@
 from flask import redirect, url_for, g, session 
 from flask_dance.contrib.twitter import make_twitter_blueprint, twitter
-from flaskapp.api import API
 from flaskapp.models import User
 from flaskapp import db
+import os
 import functools
 
 
 bp = make_twitter_blueprint(
-    api_key=API().TWITTER_KEY,
-    api_secret=API().TWITTER_SECRET,
+    api_key=os.environ.get('TWITTER_KEY'),
+    api_secret=os.environ.get('TWITTER_SECRET'),
     redirect_to='twitter.adduser'
 )
 
