@@ -1,1 +1,1 @@
-web: flask db upgrade; gunicorn flaskapp
+web: flask db upgrade; gunicorn "flaskapp:create_app()"
