@@ -1,6 +1,7 @@
-instance
 semantic
 semantic.json
 config.py
 themes
 .pytest_cache
+api.py
+app.db

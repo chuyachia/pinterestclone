@@ -1,7 +1,7 @@
 import sqlite3
 
 import pytest
-from flaskapp.controllers.db import get_db
+from flaskapp.db import get_db
 
 
 def test_get_close_db(app):

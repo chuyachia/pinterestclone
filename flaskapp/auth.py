@@ -1,14 +1,14 @@
-from flask import redirect, url_for, g, session, current_app 
+from flask import redirect, url_for, g, session 
 from flask_dance.contrib.twitter import make_twitter_blueprint, twitter
-from .db import get_db
+from flaskapp.api import API
+from flaskapp.models import User
+from flaskapp import db
 import functools
-from .config.config import Config
-
 
 
 bp = make_twitter_blueprint(
-    api_key=Config().twitterKey,
-    api_secret=Config().twitterSecret,
+    api_key=API().TWITTER_KEY,
+    api_secret=API().TWITTER_SECRET,
     redirect_to='twitter.adduser'
 )
 
@@ -37,16 +37,15 @@ def logout():
 @bp.route("/adduser")
 @login_required
 def adduser():
-    db_inst = get_db()
-    user = db_inst.execute('SELECT * FROM users WHERE user_id == (?)',(session['twitter_oauth_token']['user_id'],)).fetchone()
+    user = User.query.filter_by(userid = session['twitter_oauth_token']['user_id']).first()
     if user is None:
         print('Add new user')
-        db_inst.execute('INSERT INTO users (user_id,user_name) VALUES (?,?)',(session['twitter_oauth_token']['user_id'],
-        session['twitter_oauth_token']['screen_name']))
-        db_inst.commit()
-    elif not user['user_name'] == session['twitter_oauth_token']['screen_name']:
+        newuser = User(userid = session['twitter_oauth_token']['user_id'], username = session['twitter_oauth_token']['screen_name'])
+        db.session.add(newuser)
+        db.session.commit()
+    elif not user.username == session['twitter_oauth_token']['screen_name']:
         print('Update username to existing user')
-        db_inst.execute('UPDATE users SET user_name=?',(session['twitter_oauth_token']['screen_name'],))
-        db_inst.commit()
+        user.username = session['twitter_oauth_token']['screen_name']
+        db.session.commit()
     return redirect(url_for('images.home'))
     

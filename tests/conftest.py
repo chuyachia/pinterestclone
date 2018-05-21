@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 from flaskapp import create_app
-from flaskapp.controllers.db import get_db, init_db
+from flaskapp.db import get_db, init_db
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
     _data_sql = f.read().decode('utf8')

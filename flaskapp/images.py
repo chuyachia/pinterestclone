@@ -1,77 +1,78 @@
 from flask import render_template, session, redirect, url_for, request, flash, Blueprint
-from .auth import login_required
-from .db import get_db
+from flaskapp.auth import login_required
 from urllib.request import urlopen, Request
 from .components.forms import AddNewForm
+from flaskapp import db
+from flaskapp.models import User, Image
 
 bp = Blueprint('images',__name__)
 
 @bp.route('/')
 def home():
-    db_inst = get_db()
-    imgs = db_inst.execute('''SELECT user_name,author_id,
-    images.id AS id, created, description, url, likes 
-    FROM images JOIN users ON images.author_id == users.user_id
-    LIMIT 6''').fetchall()
-    nentries = db_inst.execute("SELECT COUNT(*) AS nentries FROM images").fetchone()
+    imgs = Image.query.join(User).add_columns(User.username).limit(6).all()
+    imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,
+        'created':x[0].created.strftime("%Y-%m-%d"),'description':x[0].description,
+        'url':x[0].url,'likes':len(x[0].liker)
+    },imgs))
+    nentries = Image.query.count()
     likes = []
     if 'twitter_oauth_token' in session:
-        likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
-        (session['twitter_oauth_token']['user_id'],)).fetchall()
-        likes = list(map(lambda x: x['image_id'], likes))
-    return render_template('index.html',path="/",imgs=imgs,likes=likes,nentries=nentries[0],form = AddNewForm(),
-    user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
+        likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
+        likes = list(map(lambda x: x.id,likes))
+    return render_template('index.html',path="/",imgs=imgs,likes=likes,nentries=nentries,form = AddNewForm(),
+    user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
 
 @bp.route('/contimg/<n>')
 def contimg(n):
-    db_inst = get_db()
-    imgs = db_inst.execute('''SELECT user_name,author_id,
-    images.id AS id, created, description, url, likes 
-    FROM images JOIN users ON images.author_id == users.user_id
-    LIMIT 6 OFFSET ?''',(n,)).fetchall()
+    imgs = Image.query.join(User).add_columns(User.username).offset(n).limit(6).all()
+    imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,
+        'created':x[0].created.strftime("%Y-%m-%d"),'description':x[0].description,
+        'url':x[0].url,'likes':len(x[0].liker)
+    },imgs))
     likes = []
     if 'twitter_oauth_token' in session:
-        likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
-        (session['twitter_oauth_token']['user_id'],)).fetchall()
-        likes = list(map(lambda x: x['image_id'], likes))
+        likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
+        likes = list(map(lambda x: x.id,likes))
     return render_template('images.html',imgs=imgs,likes=likes,
-    user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
+    user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/<userid>')
 def user_imgs(userid):
-    db_inst = get_db()
+    user = User.query.filter_by(userid=userid).count()
+    imgs= []
     likes = []
     path = None
-    imgs = db_inst.execute('''SELECT user_name,author_id, images.id AS id, created, description, url, likes 
-    FROM images JOIN users ON images.author_id == users.user_id 
-    WHERE users.user_id == ?
-    LIMIT 6''',(userid,)).fetchall()
-    if len(imgs)  == 0:
-           return render_template('index.html',path=path,imgs=imgs,likes=likes,
-           user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None),404
+    if user  == 0:
+       return render_template('index.html',path=path,imgs=imgs,likes=likes,form = AddNewForm(),
+       user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None),404
+    imgs = Image.query.join(User).filter_by(userid=userid).add_columns(User.username).all()
+    imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,
+        'created':x[0].created.strftime("%Y-%m-%d"),'description':x[0].description,
+        'url':x[0].url,'likes':len(x[0].liker)
+    },imgs))
     if 'twitter_oauth_token' in session:
-        likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
-        (session['twitter_oauth_token']['user_id'],)).fetchall()
-        likes = list(map(lambda x: x['image_id'], likes))
+        likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
+        likes = list(map(lambda x: x.id,likes))
         if session['twitter_oauth_token']['user_id'] == userid:
             path="/myimgs"
     return render_template('index.html',path=path,imgs=imgs,likes=likes,form = AddNewForm(),
-    user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
+    user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/mylikes')
 @login_required
 def mylikes():
-    db_inst = get_db()
-    imgs = db_inst.execute('''SELECT user_name, images.author_id, images.id AS id, created, description, url, likes 
-    FROM images JOIN likes ON images.id == likes.image_id JOIN users ON images.author_id == users.user_id 
-    WHERE likes.author_id == ?''',(session['twitter_oauth_token']['user_id'],))
+    imgs = Image.query.join(User).add_columns(User.username).\
+    filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
+    imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,
+        'created':x[0].created.strftime("%Y-%m-%d"),'description':x[0].description,
+        'url':x[0].url,'likes':len(x[0].liker)
+    },imgs))
     likes = []
     if 'twitter_oauth_token' in session:
-        likes= db_inst.execute('SELECT image_id FROM likes WHERE author_id =?',
-        (session['twitter_oauth_token']['user_id'],)).fetchall()
-        likes = list(map(lambda x: x['image_id'], likes))
+        likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
+        likes = list(map(lambda x: x.id,likes))
     return render_template('index.html',path="/mylikes",imgs=imgs,likes=likes,form = AddNewForm(),
-    user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None)
+    user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/new',methods=['POST'])
 @login_required
@@ -96,12 +97,11 @@ def addimg():
         if error is not None:
             flash(error,'error')
         else:
-            author_id = session['twitter_oauth_token']['user_id']
-            desc = form.desc.data 
-            db_inst = get_db()
-            db_inst.execute("INSERT INTO images (author_id,url,description,likes) VALUES (?,?,?,?)",
-            (author_id,url,desc,0))
-            db_inst.commit()
+            author = User.query.filter_by(userid= session['twitter_oauth_token']['user_id']).first()
+            desc = form.desc.data
+            img = Image(description = desc, url = url ,author = author)
+            db.session.add(img)
+            db.session.commit()
             flash('New image added','success')
     return redirect(url_for('images.home'))
      
@@ -109,15 +109,11 @@ def addimg():
 @login_required
 def like():
     if request.method == 'PUT':
-        db_inst = get_db()
-        img = db_inst.execute("SELECT * FROM images WHERE id =? ",
-        (request.form['id'],)).fetchone()
+        img = Image.query.filter_by(id=request.form['id']).first()
+        user = User.query.filter_by(userid=session['twitter_oauth_token']['user_id']).first()
         if img:
-            db_inst.execute("UPDATE images SET likes = likes + 1 WHERE id =? ",
-            (request.form['id'],))
-            db_inst.execute("INSERT INTO likes (author_id,image_id) VALUES (?,?)",
-            (session['twitter_oauth_token']['user_id'],request.form['id']))
-            db_inst.commit()
+            img.liker.append(user)
+            db.session.commit()
             return 'success',200
     return 'fail', 404
     
@@ -126,15 +122,11 @@ def like():
 @login_required
 def unlike():
     if request.method == 'PUT':
-        db_inst = get_db()
-        img = db_inst.execute("SELECT * FROM images WHERE id =? ",
-        (request.form['id'],)).fetchone()
+        img = Image.query.filter_by(id=request.form['id']).first()
+        user = User.query.filter_by(userid=session['twitter_oauth_token']['user_id']).first()
         if img:
-            db_inst.execute("UPDATE images SET likes = likes -1 WHERE id =? ",
-            (request.form['id'],))
-            db_inst.execute("DELETE FROM likes WHERE author_id= ? AND image_id=?",
-            (session['twitter_oauth_token']['user_id'],request.form['id']))
-            db_inst.commit()
+            img.liker.remove(user)
+            db.session.commit()
             return 'success', 200
     return 'fail', 404
     
@@ -142,14 +134,11 @@ def unlike():
 @login_required
 def delete():
     if request.method == 'DELETE':
-        db_inst = get_db()
-        img_author= db_inst.execute("SELECT id, author_id FROM images WHERE id =?",(request.form['img_id'],)).fetchone()
-        if str(img_author['author_id']) == session['twitter_oauth_token']['user_id']:
-            db_inst.execute("DELETE FROM images WHERE id=?",
-            (request.form['img_id'],))
-            db_inst.execute("DELETE FROM likes WHERE image_id=?",
-            (request.form['img_id'],))
-            db_inst.commit()
+        imgs = Image.query.filter(Image.author.has(userid = session['twitter_oauth_token']['user_id']),
+        Image.id == request.form['img_id']).first()
+        if imgs:
+            db.session.delete(imgs)
+            db.session.commit()
             return 'success',200
     return 'fail', 403
     
