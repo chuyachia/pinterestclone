@@ -1,1 +1,1 @@
-web: export FLASK_APP=flaskapp; flask db upgrade; waitress-serve --call 'flaskapp:create_app'
+web: flask db upgrade; gunicorn flaskapp:create_app

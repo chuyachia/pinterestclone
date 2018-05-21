@@ -11,6 +11,7 @@ Flask-Migrate==2.1.1
 Flask-OAuth==0.12
 Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
+gunicorn==19.8.1
 httplib2==0.11.3
 idna==2.6
 itsdangerous==0.24
@@ -34,6 +35,5 @@ six==1.11.0
 SQLAlchemy==1.2.7
 urllib3==1.22
 URLObject==2.4.3
-waitress==1.1.0
 Werkzeug==0.14.1
 WTForms==2.1
