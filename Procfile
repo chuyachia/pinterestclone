@@ -1,1 +1,1 @@
-web: flask db upgrade; waitress-serve --call 'flaskapp:create_app'
+web: export FLASK_APP=flaskapp; flask db upgrade; waitress-serve --call 'flaskapp:create_app'
