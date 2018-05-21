@@ -1,0 +1,1 @@
+web: flask db upgrade; waitress-serve --call 'flaskapp:create_app'
