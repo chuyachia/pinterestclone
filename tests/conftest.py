@@ -1,31 +1,26 @@
 import os
 import tempfile
-
 import pytest
 from flaskapp import create_app
-from flaskapp.db import get_db, init_db
+from flaskapp import db
+from flaskapp.models import User, Image
 
-with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
-    _data_sql = f.read().decode('utf8')
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 @pytest.fixture
 def app():
-    db_fd, db_path = tempfile.mkstemp()
-
     app = create_app({
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///' +os.path.join(basedir, 'test.db'),
         'TESTING': True,
-        'DATABASE': db_path,
+        'WTF_CSRF_ENABLED':False
     })
-    print(app)
+    
     with app.app_context():
-        init_db()
-        get_db().executescript(_data_sql)
-
+        db.create_all()
+        db.session.commit()
     yield app
-
-    os.close(db_fd)
-    os.unlink(db_path)
+    
 
 
 @pytest.fixture

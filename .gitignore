@@ -4,3 +4,5 @@ themes
 .pytest_cache
 api.py
 app.db
+.env
+test.db
