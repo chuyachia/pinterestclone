@@ -14,9 +14,9 @@
                 </div>
             </div>
             <div class="extra content">
-                <a href={{img['author_id']}}>
+                <a href={{img['authorid']}}>
                   <i class="user icon"></i>
-                  {{img['user_name']}}
+                  {{img['username']}}
                 </a>
                 <div class="like" style="float:right" id={{img['id']}}>
                   {% if user %}
@@ -27,7 +27,7 @@
                       {% endif %}
                   {% endif %}
                   <span id="nlike">{{img['likes']}}</span> Likes
-                  {% if img['author_id'] == user %}
+                  {% if img['authorid'] == user %}
                   <i class="trash alternate icon"></i>
                   {% endif %}
                 </div>

@@ -20,7 +20,7 @@ def home():
         likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
         likes = list(map(lambda x: x.id,likes))
     return render_template('index.html',path="/",imgs=imgs,likes=likes,nentries=nentries,form = AddNewForm(request.form),
-    user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
+    title="Home", user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
 
 @bp.route('/contimg/<n>')
 def contimg(n):
@@ -38,13 +38,14 @@ def contimg(n):
     
 @bp.route('/<userid>')
 def user_imgs(userid):
-    user = User.query.filter_by(userid=userid).count()
+    user = User.query.filter_by(userid=userid).first()
     imgs= []
     likes = []
     path = None
-    if user  == 0:
+    if not user :
        return render_template('index.html',path=path,imgs=imgs,likes=likes,form = AddNewForm(request.form),
-       user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None),404
+       title="Not Found", user=int(session['twitter_oauth_token']['user_id']) if 'twitter_oauth_token' in session else None),404
+    username = user.username
     imgs = Image.query.join(User).filter_by(userid=userid).add_columns(User.username).all()
     imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,
         'created':x[0].created.strftime("%Y-%m-%d"),'description':x[0].description,
@@ -56,7 +57,7 @@ def user_imgs(userid):
         if session['twitter_oauth_token']['user_id'] == userid:
             path="/myimgs"
     return render_template('index.html',path=path,imgs=imgs,likes=likes,form = AddNewForm(request.form),
-    user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
+    title=username+"'s Wall",user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/mylikes')
 @login_required
@@ -72,14 +73,13 @@ def mylikes():
         likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
         likes = list(map(lambda x: x.id,likes))
     return render_template('index.html',path="/mylikes",imgs=imgs,likes=likes,form = AddNewForm(request.form),
-    user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
+    title="My Likes",user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/new',methods=['POST'])
 @login_required
 def addimg():
     form = AddNewForm(request.form)
     if form.validate():
-        print('valid')
         url =form.url.data
         error = None
         try:
@@ -114,7 +114,6 @@ def like():
         user = User.query.filter_by(userid=session['twitter_oauth_token']['user_id']).first()
         if img:
             img.liker.append(user)
-            print(img.liker)
             db.session.commit()
             return 'success',200
     return 'fail', 404
@@ -126,10 +125,8 @@ def unlike():
     if request.method == 'PUT':
         img = Image.query.filter_by(id=request.form['id']).first()
         user = User.query.filter_by(userid=session['twitter_oauth_token']['user_id']).first()
-        print(user)
         if img:
             img.liker.remove(user)
-            print(img.liker)
             db.session.commit()
             return 'success', 200
     return 'fail', 404
