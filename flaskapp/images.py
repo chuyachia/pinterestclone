@@ -9,20 +9,11 @@ bp = Blueprint('images',__name__)
 
 @bp.route('/')
 def home():
-    imgs = Image.query.join(User).add_columns(User.username).limit(6).all()
-    imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,
-        'created':x[0].created.strftime("%Y-%m-%d"),'description':x[0].description,
-        'url':x[0].url,'likes':len(x[0].liker)
-    },imgs))
     nentries = Image.query.count()
-    likes = []
-    if 'twitter_oauth_token' in session:
-        likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
-        likes = list(map(lambda x: x.id,likes))
-    return render_template('index.html',path="/",imgs=imgs,likes=likes,nentries=nentries,form = AddNewForm(request.form),
+    return render_template('index.html',path="/",imgs=[],likes=[],nentries=nentries,form = AddNewForm(request.form),
     title="Home", user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
 
-@bp.route('/contimg/<n>')
+@bp.route('/page/<n>')
 def contimg(n):
     imgs = Image.query.join(User).add_columns(User.username).offset(n).limit(6).all()
     imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,

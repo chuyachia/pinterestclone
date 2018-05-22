@@ -56,8 +56,8 @@
     if (totalloads>0){
         var msnry = $grid.data('masonry');
         function loadPage(){
-                if (this.loadCount<totalloads){
-                      return '/contimg/'+(this.loadCount+1)*6
+                if (this.loadCount<=totalloads){
+                      return '/page/'+(this.loadCount)*6
                  }
             }
         
@@ -65,8 +65,11 @@
           path: loadPage,
           append: '.grid-item',
           status: '.page-load-status',
-          outlayer: msnry
+          outlayer: msnry,
+          prefill: true,
+          history: false
         });
+        
     }   
     $(document).on("click",".like.icon", function(){
         var $this = $(this);
