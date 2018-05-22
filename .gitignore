@@ -1,6 +1,5 @@
 semantic
 semantic.json
-themes
 .pytest_cache
 api.py
 app.db
