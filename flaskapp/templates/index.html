@@ -43,7 +43,7 @@
 {% block script %}
 <script>
 (function(){
-    var totalloads = {{nentries}}||0;
+    var totalloads = {{nentries}};
     var $grid = $('.grid');
     $grid.waitForImages(function(){
         $grid.masonry({

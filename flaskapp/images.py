@@ -24,7 +24,7 @@ def contimg(n):
     if 'twitter_oauth_token' in session:
         likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
         likes = list(map(lambda x: x.id,likes))
-    return render_template('images.html',imgs=imgs,likes=likes,
+    return render_template('images.html',imgs=imgs,likes=likes,nentries=None,
     user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/<userid>')
@@ -47,7 +47,7 @@ def user_imgs(userid):
         likes = list(map(lambda x: x.id,likes))
         if session['twitter_oauth_token']['user_id'] == userid:
             path="/myimgs"
-    return render_template('index.html',path=path,imgs=imgs,likes=likes,form = AddNewForm(request.form),
+    return render_template('index.html',path=path,imgs=imgs,likes=likes,form = AddNewForm(request.form),nentries=0,
     title=username+"'s Wall",user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/mylikes')
@@ -63,7 +63,7 @@ def mylikes():
     if 'twitter_oauth_token' in session:
         likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
         likes = list(map(lambda x: x.id,likes))
-    return render_template('index.html',path="/mylikes",imgs=imgs,likes=likes,form = AddNewForm(request.form),
+    return render_template('index.html',path="/mylikes",imgs=imgs,likes=likes,form = AddNewForm(request.form),nentries=0,
     title="My Likes",user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/new',methods=['POST'])
