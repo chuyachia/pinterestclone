@@ -43,7 +43,7 @@
 {% block script %}
 <script>
 (function(){
-    var totalloads = Math.floor('{{nentries}}'/6)||0;
+    var totalloads = {{nentries}}||0;
     var $grid = $('.grid');
     $grid.waitForImages(function(){
         $grid.masonry({
@@ -57,7 +57,7 @@
         var msnry = $grid.data('masonry');
         function loadPage(){
                 if (this.loadCount<=totalloads){
-                      return '/page/'+(this.loadCount)*6
+                      return '/page/'+this.loadCount
                  }
             }
         

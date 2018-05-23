@@ -15,7 +15,7 @@ def home():
 
 @bp.route('/page/<n>')
 def contimg(n):
-    imgs = Image.query.join(User).add_columns(User.username).offset(n).limit(6).all()
+    imgs = Image.query.join(User).add_columns(User.username).offset(n).limit(1).all()
     imgs = list(map(lambda x:{'username':x[1],'authorid':x[0].authorid, 'id':x[0].id,
         'created':x[0].created.strftime("%Y-%m-%d"),'description':x[0].description,
         'url':x[0].url,'likes':len(x[0].liker)
