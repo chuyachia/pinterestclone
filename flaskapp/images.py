@@ -28,7 +28,9 @@ def contimg(n):
     user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/<userid>')
-def user_imgs(userid):
+@bp.route('/myimgs')
+def user_imgs(userid=None):
+    userid = userid or session['twitter_oauth_token']['user_id']
     user = User.query.filter_by(userid=userid).first()
     imgs= []
     likes = []
