@@ -24,7 +24,7 @@ def contimg(n):
     if 'twitter_oauth_token' in session:
         likes = Image.query.filter(Image.liker.any(userid=session['twitter_oauth_token']['user_id'])).all()
         likes = list(map(lambda x: x.id,likes))
-    return render_template('images.html',imgs=imgs,likes=likes,nentries=None,
+    return render_template('images.html',imgs=imgs,likes=likes,nentries=None,form = AddNewForm(request.form),
     user=session['twitter_oauth_token']['user_id'] if 'twitter_oauth_token' in session else None)
     
 @bp.route('/<userid>')

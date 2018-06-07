@@ -1,3 +1,6 @@
+ {% extends 'frame.html' %}
+ {% block title %}{{title}} | Pinterest Clone{% endblock %} 
+ {% block content %}
  <div class="grid">
  {% for img in imgs %}
      <div class="grid-item">
@@ -36,3 +39,5 @@
     </div>
  {% endfor %}
  </div>
+ {% endblock %}
+ {% block script %}{% endblock %}

@@ -16,7 +16,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if not 'twitter_oauth_token' in session:
-            return redirect(url_for('twitter.login'))
+            return redirect(url_for('images.home'))
         return view(**kwargs)
     return wrapped_view
 
