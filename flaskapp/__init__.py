@@ -18,7 +18,7 @@ def create_app(test_config=None):
     db.init_app(app)
     migrate.init_app(app,db)
     
-    from . import auth, images
+    from .routes import auth, images
     app.register_blueprint(auth.bp, url_prefix="/auth")
     app.register_blueprint(images.bp)
     

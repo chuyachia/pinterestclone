@@ -2,7 +2,7 @@
 {% block script %}
 <script>
 (function(){
-    var totalloads = {{nentries}};
+    var totalloads = Math.ceil({{nentries}}/3);
     var $grid = $('.grid');
     $grid.waitForImages(function(){
         $grid.masonry({

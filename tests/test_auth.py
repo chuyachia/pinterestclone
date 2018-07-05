@@ -21,10 +21,7 @@ def test_add_user(auth,client):
         assert res.status_code==302
         assert res.headers['location'] == 'http://localhost/' # redirect to home when logged in
         auth.logout()
-        res = client.get('/auth/adduser')
-        assert res.status_code==302
-        assert res.headers['location'] == 'http://localhost/auth/twitter'  # redirect to login page when not loggedin
-        
+      
         
         
         

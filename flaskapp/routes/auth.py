@@ -16,7 +16,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if not 'twitter_oauth_token' in session:
-            return redirect(url_for('images.home'))
+            return redirect(url_for('twitter.login'))
         return view(**kwargs)
     return wrapped_view
 
@@ -35,17 +35,18 @@ def logout():
     return redirect(url_for('images.home'))
 
 @bp.route("/adduser")
-@login_required
 def adduser():
-    user = User.query.filter_by(userid = session['twitter_oauth_token']['user_id']).first()
-    if user is None:
-        print('Add new user')
-        newuser = User(userid = session['twitter_oauth_token']['user_id'], username = session['twitter_oauth_token']['screen_name'])
-        db.session.add(newuser)
-        db.session.commit()
-    elif not user.username == session['twitter_oauth_token']['screen_name']:
-        print('Update username to existing user')
-        user.username = session['twitter_oauth_token']['screen_name']
-        db.session.commit()
+    if 'twitter_oauth_token' in session:
+        user = User.query.filter_by(userid = session['twitter_oauth_token']['user_id']).first()
+        if user is None:
+            print('Add new user')
+            newuser = User(userid = session['twitter_oauth_token']['user_id'], username = session['twitter_oauth_token']['screen_name'])
+            db.session.add(newuser)
+            db.session.commit()
+        elif not user.username == session['twitter_oauth_token']['screen_name']:
+            print('Update username to existing user')
+            user.username = session['twitter_oauth_token']['screen_name']
+            db.session.commit()
     return redirect(url_for('images.home'))
+
     
