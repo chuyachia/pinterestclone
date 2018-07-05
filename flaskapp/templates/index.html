@@ -4,6 +4,7 @@
 (function(){
     var totalloads = Math.ceil({{nentries}}/3);
     var $grid = $('.grid');
+    var $loader = $('.loader');
     $grid.waitForImages(function(){
         $grid.masonry({
             itemSelector: '.grid-item',
@@ -17,8 +18,10 @@
         function loadPage(){
                 if (this.loadCount<=totalloads){
                       return '/page/'+this.loadCount
+                 } else {
+                     $loader.removeClass('active')
                  }
-            }
+        }
         
         $grid.infiniteScroll({
           path: loadPage,
