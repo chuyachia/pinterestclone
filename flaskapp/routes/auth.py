@@ -5,10 +5,11 @@ from flaskapp import db
 import os
 import functools
 
+is_prod = os.environ.get('IS_HEROKU', None)
 
 bp = make_twitter_blueprint(
-    api_key=os.environ.get('TWITTER_KEY'),
-    api_secret=os.environ.get('TWITTER_SECRET'),
+    api_key=os.environ.get('TWITTER_KEY_PROD') if is_prod else os.environ.get('TWITTER_KEY_DEV'),
+    api_secret=os.environ.get('TWITTER_SECRET_PROD') if is_prod else os.environ.get('TWITTER_SECRET_DEV'),
     redirect_to='twitter.adduser'
 )
 
