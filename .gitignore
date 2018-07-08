@@ -4,3 +4,6 @@ semantic.json
 app.db
 .env
 test.db
+flaskapp/static/components
+flaskapp/static/semantic.css
+flaskapp/static/semantic.js

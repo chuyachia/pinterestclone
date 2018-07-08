@@ -28,6 +28,11 @@
   </div>
 
 </div>
+<div class="ui basic modal">
+   <div class="image content">
+    <img class="image">
+    </div>
+ </div>
 <div class="ui modal">
   <div class="header">New Image</div>
   <div class="content">
@@ -72,6 +77,12 @@ $('.showmodal').on('click',function(){
  $('.ui.modal')
   .modal('show');
 })
+$('.grid').on('click','img',function(){
+ var $this = $(this);
+ $('.ui.basic.modal').find('img').attr('src',$this.attr('src'));
+ $('.ui.basic.modal').modal('show');
+});
+
 $('.ui.dropdown')
   .dropdown();
 </script>
